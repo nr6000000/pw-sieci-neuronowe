@@ -60,6 +60,7 @@ class MLPNetwork:
     def backpropagate(self, x: np.ndarray, y_target: ArrayLike) -> tuple[list[np.ndarray], list[np.ndarray]]:
         x = np.atleast_2d(x)
         y_target = np.atleast_2d(y_target)
+        n = x.shape[0]
         
         zs = []
         activations = []
@@ -73,14 +74,14 @@ class MLPNetwork:
         delta = LOSS_GRAD[self.loss](activations[-1], y_target) * \
             ACTIVATION_GRAD[self.activation_funs[-1]](zs[-1])
 
-        grad_bias = [delta]
-        grad_weights = [activations[-2].T @ delta]
+        grad_bias = [np.sum(delta, axis=0, keepdims=True) / n]
+        grad_weights = [activations[-2].T @ delta / n]
         
         for i in range(-2, -len(zs)-1, -1):
             act_grad = ACTIVATION_GRAD[self.activation_funs[i]](zs[i])
             delta = (delta @ self.weights[i+1].T) * act_grad
-            grad_bias.append(delta)
-            grad_weights.append(activations[i-1].T @ delta)
+            grad_bias.append(np.sum(delta, axis=0, keepdims=True) / n)
+            grad_weights.append(activations[i-1].T @ delta / n)
 
         return grad_bias[::-1], grad_weights[::-1]
     
@@ -96,7 +97,9 @@ if __name__ == '__main__':
         seed=42
     )
 
-    x = np.random.uniform(-10, 10, 1)
+    x = np.random.uniform(-10, 10, (7, 1))
     print(x)
     print(model.predict(x))
-    print(model.backpropagate(x, 10))
+    print(model.backpropagate(x, np.array([[1, 2, 3, 4, 5, 6, 7]]).T))
+    
+    print(model.backpropagate(np.random.uniform(-10, 10, 1), 10))
