@@ -18,6 +18,11 @@ class Activation:
     def linear(x: np.ndarray) -> np.ndarray:
         return x
 
+    @staticmethod
+    def softmax(x: np.ndarray) -> np.ndarray:
+        exp = np.exp(x - np.max(x, axis=1, keepdims=True))
+        return exp / np.sum(exp, axis=1, keepdims=True)
+
     class Gradient:
         @staticmethod
         def relu(x: np.ndarray) -> np.ndarray:

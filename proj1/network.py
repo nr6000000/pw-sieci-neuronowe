@@ -62,12 +62,12 @@ class MLPNetwork:
     def _backward(self, y_target: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         activations = self.cached_after_activations
         zs = self.cached_before_activations
-        n = len(activations)
+        n = y_target.shape[0]
 
-        delta = self.loss_gradient_function(activations[-1], y_target) * \
+        delta = self.loss_gradient_function(y_target, activations[-1]) * \
             self.activation_gradient_functions[-1](zs[-1])
 
-        grad_biases = [np.sum(delta, axis=0, keepdims=True) / n]
+        grad_biases = [np.sum(delta, axis=0) / n]
         grad_weights = [activations[-2].T @ delta / n]
         
         for i in range(-2, -len(zs)-1, -1):
@@ -78,7 +78,7 @@ class MLPNetwork:
 
         return grad_weights[::-1], grad_biases[::-1]
 
-    def _update_parameters(self, grad_weights: np.ndarray, grad_biases: np.ndarray, learning_rage: float) -> None:
+    def _update_parameters(self, grad_weights: list[np.ndarray], grad_biases: list[np.ndarray], learning_rage: float) -> None:
         for i in range(len(self.weights)):
             self.weights[i] -= grad_weights[i] * learning_rage
             if self.include_bias:
@@ -98,7 +98,7 @@ class MLPNetwork:
 
                 X_batch, y_batch = X[batch_indices], y[batch_indices]
                 y_pred = self._forward(X_batch, cached_activations=True)
-                loss = self.loss_function(y_pred, y_batch)
+                loss = self.loss_function(y_batch, y_pred)
 
                 grad_weights, grad_biases = self._backward(y_batch)
 
@@ -106,5 +106,5 @@ class MLPNetwork:
 
                 if history_saved:
                     self.loss_history.append(loss)
-                    self.weight_history.append() #TODO
+                    self.weight_history.append([w.copy() for w in self.weights]) #TODO
 

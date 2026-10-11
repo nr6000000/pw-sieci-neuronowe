@@ -1,13 +1,23 @@
 import unittest
 from network import *
 
+
+class TestMLP(unittest.TestCase):
+    def setUp(self):
+        self.mlp = MLPNetwork()
+
+    def test_gradient_check(self):
+        pass
+
+
 class TestMLPRegression(unittest.TestCase):
     def setUp(self):
         self.mlp = MLPNetwork()
 
     # regression towards y = 3x - 2
     def test_regression_linear(self):
-        pass
+        x = [i for i in range(-20, 20)]
+        y = [3 * i - 2 for i in x]
 
     def test_dataset_regression_activation(self):
         pass
