@@ -33,12 +33,12 @@ class MLPNetwork:
         self.loss_function = loss_function
         self.loss_gradient_function = loss_gradient_function
 
-        rng = np.random.default_rng(seed=seed)
+        self.rng = np.random.default_rng(seed=seed)
         self.activation_functions = [layer.activation_function for layer in layers]
         self.activation_gradient_functions = [layer.activation_gradient_function for layer in layers]
 
         layer_sizes = [input_size] + [layer.neurons for layer in layers]
-        self.weights = [rng.normal(0, np.sqrt(2 / in_size), (in_size, out_size)) # He initialization
+        self.weights = [self.rng.normal(0, np.sqrt(2 / in_size), (in_size, out_size)) # He initialization
                        for in_size, out_size in itertools.pairwise(layer_sizes)]
         self.biases = [np.zeros(out_size) for out_size in layer_sizes[1:]]
 
@@ -62,7 +62,7 @@ class MLPNetwork:
     def _backward(self, y_target: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         activations = self.cached_after_activations
         zs = self.cached_before_activations
-        n = activations.shape[0]
+        n = len(activations)
 
         delta = self.loss_gradient_function(activations[-1], y_target) * \
             self.activation_gradient_functions[-1](zs[-1])
@@ -71,7 +71,7 @@ class MLPNetwork:
         grad_weights = [activations[-2].T @ delta / n]
         
         for i in range(-2, -len(zs)-1, -1):
-            act_grad = self.activation_functions[i](zs[i])
+            act_grad = self.activation_gradient_functions[i](zs[i])
             delta = (delta @ self.weights[i+1].T) * act_grad
             grad_biases.append(np.sum(delta, axis=0, keepdims=True) / n)
             grad_weights.append(activations[i-1].T @ delta / n)
@@ -89,16 +89,16 @@ class MLPNetwork:
 
         batches_num = len(X)
 
-        for epoch in range(epochs):
+        for _ in range(epochs):
             shuffled_indices = self.rng.permutation(batches_num)
             for batch_start in range(0, batches_num, batch_size):
                 batch_indices = shuffled_indices[batch_start:batch_start + batch_size]
 
                 X_batch, y_batch = X[batch_indices], y[batch_indices]
                 y_pred = self._forward(X_batch, cached_activations=True)
-                loss = self.loss_function
+                loss = self.loss_function(y_pred, y_batch)
 
-                grad_weights, grad_biases = self._backward()
+                grad_weights, grad_biases = self._backward(y_batch)
 
                 self._update_weights(grad_weights, grad_biases, learning_rate)
 
