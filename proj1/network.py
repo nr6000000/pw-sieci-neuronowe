@@ -6,12 +6,20 @@ from losses import *
 import numpy as np
 
 
+class Layer:
+    def __init__(self, neurons: int, activation_function: Callable[[np.ndarray], np.ndarray], activation_gradient_function: Callable[[np.ndarray], np.ndarray]):
+        self.neurons = neurons
+        self.activation_function = activation_function
+        self.activation_gradient_function = activation_gradient_function
+
+
 class MLPNetwork:
     def __init__(
             self,
             input_size: int,
-            layers: list[tuple[int, Callable[[np.ndarray], np.ndarray]]],
+            layers: list[Layer],
             loss_function: Callable[[np.ndarray, np.ndarray], float],
+            loss_gradient_function: Callable[[np.ndarray, np.ndarray], float],
             include_bias: bool,
             seed: int
     ) -> None:
@@ -23,11 +31,13 @@ class MLPNetwork:
         self.seed = seed
         self.include_bias = include_bias
         self.loss_function = loss_function
+        self.loss_gradient_function = loss_gradient_function
 
         rng = np.random.default_rng(seed=seed)
-        self.activation_functions = [layer[1] for layer in layers]
+        self.activation_functions = [layer.activation_function for layer in layers]
+        self.activation_gradient_functions = [layer.activation_gradient_function for layer in layers]
 
-        layer_sizes = [input_size] + [layer[0] for layer in layers]
+        layer_sizes = [input_size] + [layer.neurons for layer in layers]
         self.weights = [rng.normal(0, np.sqrt(2 / in_size), (in_size, out_size)) # He initialization
                        for in_size, out_size in itertools.pairwise(layer_sizes)]
         self.biases = [np.zeros(out_size) for out_size in layer_sizes[1:]]
@@ -35,10 +45,9 @@ class MLPNetwork:
     def _forward(self, X: np.ndarray, cached_activations=False) -> np.ndarray:
         if cached_activations:
             self.cached_before_activations = []
-            # needed for 
             self.cached_after_activations = [X]
-        for weights, bias, activation in zip(self.weights, self.biases, self.activations):
-            X = X @ weights + bias if self.include_bias else np.zeros(shape=X.shape)
+        for weights, bias, activation in zip(self.weights, self.biases, self.activation_functions):
+            X = X @ weights + (bias if self.include_bias else np.zeros(shape=X.shape))
             if cached_activations:
                 self.cached_before_activations.append(X)
             X = activation(X)
@@ -53,10 +62,10 @@ class MLPNetwork:
     def _backward(self, y_target: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         activations = self.cached_after_activations
         zs = self.cached_before_activations
-        n = X.shape[0]
+        n = activations.shape[0]
 
-        delta = self.loss_function(activations[-1], y_target) * \
-            self.activation_functions[-1](zs[-1])
+        delta = self.loss_gradient_function(activations[-1], y_target) * \
+            self.activation_gradient_functions[-1](zs[-1])
 
         grad_biases = [np.sum(delta, axis=0, keepdims=True) / n]
         grad_weights = [activations[-2].T @ delta / n]
@@ -71,7 +80,7 @@ class MLPNetwork:
 
     def _update_weights(self, grad_weights: np.ndarray, grad_biases: np.ndarray, learning_rage: float) -> None:
         for self_weights, in_weights in zip(self.weights, grad_weights):
-            self_weights -= in_weights * learning_rage + grad_biases if self.include_bias else np.zeros(shape=self_weights.shape)
+            self_weights -= in_weights * learning_rage + (grad_biases if self.include_bias else np.zeros(shape=self_weights.shape))
 
     def fit(self, X: np.ndarray, y: np.ndarray, epochs: int=1000, learning_rate: float=0.015, batch_size: int=64, history_saved=False) -> None:
         if history_saved:
@@ -80,10 +89,10 @@ class MLPNetwork:
 
         batches_num = len(X)
 
-        for epoch in epochs:
+        for epoch in range(epochs):
             shuffled_indices = self.rng.permutation(batches_num)
-            for batch_index in range(0, batches_num, batch_size):
-                batch_indices = indices[batch_]
+            for batch_start in range(0, batches_num, batch_size):
+                batch_indices = shuffled_indices[batch_start:batch_start + batch_size]
 
                 X_batch, y_batch = X[batch_indices], y[batch_indices]
                 y_pred = self._forward(X_batch, cached_activations=True)
