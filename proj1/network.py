@@ -78,9 +78,11 @@ class MLPNetwork:
 
         return grad_weights[::-1], grad_biases[::-1]
 
-    def _update_weights(self, grad_weights: np.ndarray, grad_biases: np.ndarray, learning_rage: float) -> None:
-        for self_weights, in_weights in zip(self.weights, grad_weights):
-            self_weights -= in_weights * learning_rage + (grad_biases if self.include_bias else np.zeros(shape=self_weights.shape))
+    def _update_parameters(self, grad_weights: np.ndarray, grad_biases: np.ndarray, learning_rage: float) -> None:
+        for i in range(len(self.weights)):
+            self.weights[i] -= grad_weights[i] * learning_rage
+            if self.include_bias:
+                self.biases[i] -= grad_biases[i] * learning_rage
 
     def fit(self, X: np.ndarray, y: np.ndarray, epochs: int=1000, learning_rate: float=0.015, batch_size: int=64, history_saved=False) -> None:
         if history_saved:
@@ -100,9 +102,9 @@ class MLPNetwork:
 
                 grad_weights, grad_biases = self._backward(y_batch)
 
-                self._update_weights(grad_weights, grad_biases, learning_rate)
+                self._update_parameters(grad_weights, grad_biases, learning_rate)
 
                 if history_saved:
                     self.loss_history.append(loss)
-                    self.weight_history.append()
+                    self.weight_history.append() #TODO
 
