@@ -19,8 +19,10 @@ ACTIVATION_GRAD = {
     ActivationType.SIGMOID: lambda x: np.exp(-x)/((1-np.exp(-x))**2),
 }
 
+
 class LossType(Enum):
     MSE = auto()
+    MAE = auto()
 
 LOSS_FN = {
     LossType.MSE: lambda y, y_target: np.sum((y_target-y)**2)/2,
