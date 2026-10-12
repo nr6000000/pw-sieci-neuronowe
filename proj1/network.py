@@ -46,8 +46,10 @@ class MLPNetwork:
         if cached_activations:
             self.cached_before_activations = []
             self.cached_after_activations = [X]
-        for weights, bias, activation in zip(self.weights, self.biases, self.activation_functions):
-            X = X @ weights + (bias if self.include_bias else np.zeros(shape=X.shape))
+        for weights, biases, activation in zip(self.weights, self.biases, self.activation_functions):
+            X = X @ weights
+            if self.include_bias:
+                X += biases
             if cached_activations:
                 self.cached_before_activations.append(X)
             X = activation(X)
@@ -100,11 +102,11 @@ class MLPNetwork:
                 y_pred = self._forward(X_batch, cached_activations=True)
                 loss = self.loss_function(y_batch, y_pred)
 
-                grad_weights, grad_biases = self._backward(y_batch)
-
-                self._update_parameters(grad_weights, grad_biases, learning_rate)
-
                 if history_saved:
                     self.loss_history.append(loss)
                     self.weight_history.append([w.copy() for w in self.weights]) #TODO
+
+                grad_weights, grad_biases = self._backward(y_batch)
+
+                self._update_parameters(grad_weights, grad_biases, learning_rate)
 
