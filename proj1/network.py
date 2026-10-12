@@ -75,7 +75,7 @@ class MLPNetwork:
         for i in range(-2, -len(zs)-1, -1):
             act_grad = self.activation_gradient_functions[i](zs[i])
             delta = (delta @ self.weights[i+1].T) * act_grad
-            grad_biases.append(np.sum(delta, axis=0, keepdims=True) / n)
+            grad_biases.append(np.sum(delta, axis=0) / n)
             grad_weights.append(activations[i-1].T @ delta / n)
 
         return grad_weights[::-1], grad_biases[::-1]
