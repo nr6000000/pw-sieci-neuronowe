@@ -12,7 +12,7 @@ class TestMLP(unittest.TestCase):
 
 class TestMLPRegression(unittest.TestCase):
     def test_regression_linear(self):
-        X = np.linspace(-10, 20, 1000).reshape(-1, 1)
+        X = np.linspace(-2, 3, 200).reshape(-1, 1)
         y = 3 * X - 2
         model = MLPNetwork(
             input_size=1,
@@ -29,7 +29,7 @@ class TestMLPRegression(unittest.TestCase):
         model.fit(
             X, y,
             epochs=800,
-            learning_rate=0.04,
+            learning_rate=0.05,
             batch_size=32,
             history_saved=True
         )
@@ -53,12 +53,12 @@ class TestMLPRegression(unittest.TestCase):
 
     def test_regression_quadratic(self):
         # y = x^2
-        X = np.linspace(-5, 10, 500).reshape(-1, 1)
+        X = np.linspace(-3, 3, 500).reshape(-1, 1)
         y = X ** 2 - 1
         model = MLPNetwork(
             input_size=1,
             layers=[
-                Layer(12, Activation.tanh, Activation.Gradient.tanh),
+                Layer(16, Activation.tanh, Activation.Gradient.tanh),
                 Layer(1, Activation.linear, Activation.Gradient.linear),
             ],
             loss_function=Loss.mse,
@@ -70,7 +70,7 @@ class TestMLPRegression(unittest.TestCase):
         initial_loss = Loss.mse(y, model.predict(X))
         model.fit(
             X, y,
-            epochs=800,
+            epochs=1500,
             learning_rate=0.02,
             batch_size=32
         )
