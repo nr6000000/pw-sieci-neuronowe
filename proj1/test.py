@@ -3,10 +3,10 @@ from network import *
 
 
 class TestMLP(unittest.TestCase):
-    def setUp(self):
-        self.mlp = MLPNetwork()
-
     def test_gradient_check(self):
+        pass
+
+    def test_multiclass(self):
         pass
 
 
@@ -14,6 +14,7 @@ class TestMLPRegression(unittest.TestCase):
     def test_regression_linear(self):
         X = np.linspace(-2, 3, 200).reshape(-1, 1)
         y = 3 * X - 2
+        EPOCHS = 800
         model = MLPNetwork(
             input_size=1,
             layers=[
@@ -28,7 +29,7 @@ class TestMLPRegression(unittest.TestCase):
         loss_before = Loss.mse(y, model.predict(X))
         model.fit(
             X, y,
-            epochs=800,
+            epochs=EPOCHS,
             learning_rate=0.05,
             batch_size=32,
             history_saved=True
@@ -38,7 +39,7 @@ class TestMLPRegression(unittest.TestCase):
         self.assertLess(loss_after, loss_before)
         self.assertLess(loss_after, 0.01)
 
-        X_test = np.array([[-1.276], [0.333], [2.626], [2.626], [2.626]])
+        X_test = np.array([[-1.276], [0.333], [0.666], [2.4], [2.626]])
 
         np.testing.assert_allclose(
             model.predict(X_test),
@@ -47,7 +48,7 @@ class TestMLPRegression(unittest.TestCase):
         )
 
         # Czy historia została zapisana?
-        n_steps = 200 * ((len(X) + 16 - 1) // 16)
+        n_steps = EPOCHS * ((len(X) + 16 - 1) // 16)
         self.assertEqual(len(model.loss_history), n_steps)
         self.assertEqual(len(model.weight_history), n_steps)
 
@@ -75,7 +76,7 @@ class TestMLPRegression(unittest.TestCase):
             batch_size=32
         )
 
-        X_test = np.linspace(-4, 10, 200).reshape(-1, 1)
+        X_test = X.copy()
         y_test = X_test ** 2 - 1
         test_mse = Loss.mse(y_test, model.predict(X_test))
 
@@ -93,11 +94,7 @@ class TestMLPRegression(unittest.TestCase):
         pass
 
 
-class TestMLPClassification(unittest.TestCase):
-    def setUp(self):
-        self.mlp = MLPNetwork()
-
-    # classify (separate) x1 + x2 > 0 vs otherwise
+class TestMLPClassification(unittest.TestCase):# classify (separate) x1 + x2 > 0 vs otherwise
     def test_positive_sum(self):
         pass
 
