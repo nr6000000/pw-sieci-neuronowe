@@ -61,7 +61,7 @@ class MLPNetwork:
         # only predict without caching for backpropagation
         return self._forward(X)
 
-    def _backward(self, y_target: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    def _backward(self, y_target: np.ndarray) -> tuple[list[np.ndarray], list[np.ndarray]]:
         activations = self.cached_after_activations
         zs = self.cached_before_activations
         n = y_target.shape[0]
