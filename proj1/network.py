@@ -1,9 +1,10 @@
 import itertools
 from collections.abc import Callable
-from activations import *
-from losses import *
 
 import numpy as np
+
+from activations import *
+from losses import *
 
 
 class Layer:

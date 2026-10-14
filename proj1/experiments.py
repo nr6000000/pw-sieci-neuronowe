@@ -1,5 +1,5 @@
-from typing import Callable
-import numpy as np
+from collections.abc import Callable
+
 
 class Experiments:
     def __init__(self, test_function: Callable):
