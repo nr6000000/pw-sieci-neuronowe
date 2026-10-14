@@ -26,7 +26,7 @@ class Activation:
     class Gradient:
         @staticmethod
         def relu(x: np.ndarray) -> np.ndarray:
-            return np.where(x <= 0, 0, 1) 
+            return np.where(x <= 0, 0, 1)
 
         @staticmethod
         def sigmoid(x: np.ndarray) -> np.ndarray:
@@ -39,8 +39,7 @@ class Activation:
         @staticmethod
         def linear(x: np.ndarray) -> np.ndarray:
             return np.ones(shape=x.shape)
-        
+
         @staticmethod
         def softmax(x: np.ndarray) -> np.ndarray:
             raise NotImplementedError
-
