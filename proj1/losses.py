@@ -14,10 +14,11 @@ class Loss:
     def bce(y_target: np.ndarray, y_pred: np.ndarray) -> float:
         pred_clipped = np.clip(y_pred, 1e-12, 1 - 1e-12)
         return -np.mean(y_target * np.log(pred_clipped) + (1 - y_target) * np.log(1 - pred_clipped))
-    
+
     @staticmethod
     def cce(y_target: np.ndarray, y_pred: np.ndarray) -> float:
-        pass
+        pred_clipped = np.clip(y_pred, 1e-12, 1.0)
+        return -np.mean(np.sum(y_target * np.log(pred_clipped), axis=1))
 
     class Gradient:
         @staticmethod
@@ -31,5 +32,11 @@ class Loss:
         @staticmethod
         def bce(y_target: np.ndarray, y_pred: np.ndarray) -> float:
             pred_clipped = np.clip(y_pred, 1e-12, 1 - 1e-12)
-            return (-y_target / pred_clipped + (1 - y_target) / (1 - pred_clipped)) / pred_clipped.shape[1]
+            return (
+                -y_target / pred_clipped + (1 - y_target) / (1 - pred_clipped)
+            ) / pred_clipped.shape[1]
 
+        @staticmethod
+        def cce(y_target, y_pred):
+            pred_clipped = np.clip(y_pred, 1e-12, 1.0)
+            return -y_target / pred_clipped
