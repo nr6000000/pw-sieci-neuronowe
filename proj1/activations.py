@@ -39,3 +39,8 @@ class Activation:
         @staticmethod
         def linear(x: np.ndarray) -> np.ndarray:
             return np.ones(shape=x.shape)
+        
+        @staticmethod
+        def softmax(x: np.ndarray) -> np.ndarray:
+            raise NotImplementedError
+

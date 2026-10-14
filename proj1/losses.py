@@ -14,6 +14,10 @@ class Loss:
     def bce(y_target: np.ndarray, y_pred: np.ndarray) -> float:
         pred_clipped = np.clip(y_pred, 1e-12, 1 - 1e-12)
         return -np.mean(y_target * np.log(pred_clipped) + (1 - y_target) * np.log(1 - pred_clipped))
+    
+    @staticmethod
+    def cce(y_target: np.ndarray, y_pred: np.ndarray) -> float:
+        pass
 
     class Gradient:
         @staticmethod

@@ -22,7 +22,7 @@ class MLPNetwork:
             loss_function: Callable[[np.ndarray, np.ndarray], float],
             loss_gradient_function: Callable[[np.ndarray, np.ndarray], float],
             include_bias: bool,
-            seed: int
+            seed: int | None = None
     ) -> None:
         self.loss_history: list[float] = []
         self.weight_history: list[float] = []
@@ -31,12 +31,12 @@ class MLPNetwork:
 
         self.seed = seed
         self.include_bias = include_bias
-        self.loss_function = loss_function
-        self.loss_gradient_function = loss_gradient_function
+        self.loss_fn = loss_function
+        self.loss_grad = loss_gradient_function
 
         self.rng = np.random.default_rng(seed=seed)
-        self.activation_functions = [layer.activation_function for layer in layers]
-        self.activation_gradient_functions = [layer.activation_gradient_function for layer in layers]
+        self.activation_fns = [layer.activation_function for layer in layers]
+        self.activation_grads = [layer.activation_gradient_function for layer in layers]
 
         layer_sizes = [input_size] + [layer.neurons for layer in layers]
         self.weights = [self.rng.normal(0, np.sqrt(2 / in_size), (in_size, out_size)) # He initialization
@@ -47,7 +47,7 @@ class MLPNetwork:
         if cached_activations:
             self.cached_before_activations = []
             self.cached_after_activations = [X]
-        for weights, biases, activation in zip(self.weights, self.biases, self.activation_functions):
+        for weights, biases, activation in zip(self.weights, self.biases, self.activation_fns):
             X = X @ weights
             if self.include_bias:
                 X += biases
@@ -67,14 +67,26 @@ class MLPNetwork:
         zs = self.cached_before_activations
         n = y_target.shape[0]
 
-        delta = self.loss_gradient_function(y_target, activations[-1]) * \
-            self.activation_gradient_functions[-1](zs[-1])
+        # Delta computation specialization
+        if (
+            (self.loss_fn is Loss.mse and self.activation_fns[-1] is Activation.linear) or
+            (self.loss_fn is Loss.bce and self.activation_fns[-1] is Activation.sigmoid) or
+            (self.loss_fn is Loss.cce and self.activation_fns[-1] is Activation.softmax)
+        ):
+            delta = activations[-1] - y_target
+        elif self.activation_fns[-1] is Activation.softmax:
+            a = activations[-1]
+            grad_a = self.loss_grad(y_target, a)
+            delta = a * (grad_a - grad_a@a.T)
+        else:
+            delta = self.loss_grad(y_target, activations[-1]) * \
+                self.activation_grads[-1](zs[-1])
 
         grad_biases = [np.sum(delta, axis=0) / n]
         grad_weights = [activations[-2].T @ delta / n]
         
         for i in range(-2, -len(zs)-1, -1):
-            act_grad = self.activation_gradient_functions[i](zs[i])
+            act_grad = self.activation_grads[i](zs[i])
             delta = (delta @ self.weights[i+1].T) * act_grad
             grad_biases.append(np.sum(delta, axis=0) / n)
             grad_weights.append(activations[i-1].T @ delta / n)
@@ -101,7 +113,7 @@ class MLPNetwork:
 
                 X_batch, y_batch = X[batch_indices], y[batch_indices]
                 y_pred = self._forward(X_batch, cached_activations=True)
-                loss = self.loss_function(y_batch, y_pred)
+                loss = self.loss_fn(y_batch, y_pred)
 
                 if history_saved:
                     self.loss_history.append(loss)
