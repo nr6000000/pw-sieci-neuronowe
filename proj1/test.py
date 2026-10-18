@@ -145,10 +145,9 @@ class TestMLPRegression(unittest.TestCase):
         X, y = train[:, :1], train[:, 1:2]
         X_test, y_test = test[:, :1], test[:, 1:2]
 
-        # Normalizacja na podstawie training set
+        # norm
         xm, xs = X.mean(axis=0), X.std(axis=0)
         ym, ys = y.mean(axis=0), y.std(axis=0)
-
         Xn = (X - xm) / xs
         yn = (y - ym) / ys
 
@@ -164,15 +163,11 @@ class TestMLPRegression(unittest.TestCase):
             True,
             67,
         )
-
         initial_loss = Loss.mse(yn, model.predict(Xn))
         model.fit(Xn, yn, epochs=900, learning_rate=0.02, batch_size=32)
-
         self.assertLess(Loss.mse(yn, model.predict(Xn)), initial_loss)
 
-        # Oceniamy interpolację — test set obejmuje też ekstrapolację
         mask = (X_test[:, 0] >= X.min()) & (X_test[:, 0] <= X.max())
-
         prediction = model.predict((X_test[mask] - xm) / xs) * ys + ym
         baseline = np.full_like(y_test[mask], ym.item())
 
@@ -186,7 +181,7 @@ class TestMLPRegression(unittest.TestCase):
         self._check_dataset_regression("cube")
 
 
-class TestMLPClassification(unittest.TestCase):  # classify (separate) x1 + x2 > 0 vs otherwise
+class TestMLPClassification(unittest.TestCase):
     def _check_dataset_classification(self, name, classes):
         train = load_csv("classification", name, "train")
         test = load_csv("classification", name, "test")
@@ -194,7 +189,7 @@ class TestMLPClassification(unittest.TestCase):  # classify (separate) x1 + x2 >
         X = train[:, :2]
         X_test = test[:, :2]
 
-        # Etykiety z plików to 1,2 albo 1,2,3
+        # labels: 1, 2, 3
         labels = train[:, 2].astype(int) - 1
         y_test = test[:, 2].astype(int) - 1
 
@@ -221,11 +216,9 @@ class TestMLPClassification(unittest.TestCase):  # classify (separate) x1 + x2 >
 
         initial_loss = loss(y, model.predict(X))
         model.fit(X, y, epochs=500, learning_rate=0.05, batch_size=32)
-
         self.assertLess(loss(y, model.predict(X)), initial_loss)
 
         probabilities = model.predict(X_test)
-
         if classes == 2:
             predicted = (probabilities[:, 0] >= 0.5).astype(int)
         else:
@@ -233,7 +226,6 @@ class TestMLPClassification(unittest.TestCase):  # classify (separate) x1 + x2 >
             np.testing.assert_allclose(probabilities.sum(axis=1), 1.0, atol=1e-7)
 
         accuracy = np.mean(predicted == y_test)
-
         self.assertGreater(accuracy, 0.55)
 
     def test_positive_sum(self):
@@ -255,13 +247,11 @@ class TestMLPClassification(unittest.TestCase):  # classify (separate) x1 + x2 >
         )
 
         model.fit(X, y, epochs=350, learning_rate=0.05, batch_size=32)
-
         X_test = np.random.default_rng(999).uniform(-2, 2, (150, 2))
         y_test = (X_test.sum(axis=1) > 0).astype(int)
 
         predicted = (model.predict(X_test).ravel() >= 0.5).astype(int)
         accuracy = np.mean(predicted == y_test)
-
         self.assertGreaterEqual(accuracy, 0.95)
 
     def test_dataset_classification_simple(self):

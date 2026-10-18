@@ -11,7 +11,7 @@ class Layer:
         self,
         neurons: int,
         activation_function: Callable[[np.ndarray], np.ndarray],
-        activation_gradient_function: Callable[[np.ndarray], np.ndarray],
+        activation_gradient_function: Callable[[np.ndarray], np.ndarray] | None = None,
     ):
         self.neurons = neurons
         self.activation_function = activation_function
