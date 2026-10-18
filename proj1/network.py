@@ -74,10 +74,8 @@ class MLPNetwork:
         n = y_target.shape[0]
 
         # Delta computation specialization
-        if (
-            (self.loss_fn is Loss.mse and self.activation_fns[-1] is Activation.linear)
-            or (self.loss_fn is Loss.bce and self.activation_fns[-1] is Activation.sigmoid)
-            or (self.loss_fn is Loss.cce and self.activation_fns[-1] is Activation.softmax)
+        if (self.loss_fn is Loss.bce and self.activation_fns[-1] is Activation.sigmoid) or (
+            self.loss_fn is Loss.cce and self.activation_fns[-1] is Activation.softmax
         ):
             delta = activations[-1] - y_target
         elif self.activation_fns[-1] is Activation.softmax:
