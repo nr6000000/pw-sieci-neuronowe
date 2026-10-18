@@ -95,7 +95,9 @@ class TestMLPRegression(unittest.TestCase):
         )
 
         loss_before = Loss.mse(y, model.predict(X))
-        model.fit(X, y, epochs=EPOCHS, learning_rate=0.05, BATCH_SIZE=32, history_saved=True)
+        model.fit(
+            X, y, epochs=EPOCHS, learning_rate=0.05, batch_size=BATCH_SIZE, history_saved=True
+        )
         loss_after = Loss.mse(y, model.predict(X))
 
         self.assertLess(loss_after, loss_before)
