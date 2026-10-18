@@ -1,12 +1,9 @@
-import unittest
-
 import numpy as np
-
 from activations import Activation
 from losses import Loss
 from network import Layer, MLPNetwork
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     model = MLPNetwork(
         5,
         [
@@ -17,7 +14,7 @@ if __name__ == '__main__':
         Loss.mse,
         Loss.Gradient.mse,
         True,
-        42
+        42,
     )
 
     X = np.random.uniform(-10, 10, (1, 5))
