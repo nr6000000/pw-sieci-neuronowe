@@ -162,7 +162,7 @@ class TestMLPRegression(unittest.TestCase):
             Loss.mse,
             Loss.Gradient.mse,
             True,
-            42,
+            67,
         )
 
         initial_loss = Loss.mse(yn, model.predict(Xn))
