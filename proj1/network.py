@@ -147,9 +147,14 @@ class MLPNetwork:
 
                 if history_saved:
                     self.loss_history.append(loss)
+<<<<<<< HEAD
                     self.weight_history.append([w.copy() for w in self.weights])
                     if self.include_bias:
                         self.bias_history.append([b.copy() for b in self.biases])
+=======
+                    # TODO: Full weight snapshots per batch may exhaust memory on MNI
+                    self.weight_history.append([w.copy() for w in self.weights])
+>>>>>>> f72b50f (Add experiments and pre-commit YAML)
 
                 grad_weights, grad_biases = self._backward(y_batch)
 
