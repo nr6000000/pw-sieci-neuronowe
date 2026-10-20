@@ -145,7 +145,8 @@ class MLPNetwork:
 
                 if history_saved:
                     self.loss_history.append(loss)
-                    self.weight_history.append([w.copy() for w in self.weights])  # TODO
+                    # TODO: Full weight snapshots per batch may exhaust memory on MNI
+                    self.weight_history.append([w.copy() for w in self.weights])
 
                 grad_weights, grad_biases = self._backward(y_batch)
 
