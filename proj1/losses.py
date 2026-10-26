@@ -8,7 +8,7 @@ class Loss:
 
     @staticmethod
     def mse(y_target: np.ndarray, y_pred: np.ndarray) -> float:
-        return np.mean((y_target - y_pred) ** 2)
+        return 0.5 * np.mean((y_target - y_pred) ** 2)
 
     @staticmethod
     def bce(y_target: np.ndarray, y_pred: np.ndarray) -> float:
@@ -22,21 +22,21 @@ class Loss:
 
     class Gradient:
         @staticmethod
-        def mae(y_target: np.ndarray, y_pred: np.ndarray) -> float:
+        def mae(y_target: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
             return np.sign(y_pred - y_target) / y_pred.shape[1]
 
         @staticmethod
-        def mse(y_target: np.ndarray, y_pred: np.ndarray) -> float:
-            return 2 * (y_pred - y_target) / y_pred.shape[1]
+        def mse(y_target: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
+            return y_pred - y_target
 
         @staticmethod
-        def bce(y_target: np.ndarray, y_pred: np.ndarray) -> float:
+        def bce(y_target: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
             pred_clipped = np.clip(y_pred, 1e-12, 1 - 1e-12)
             return (
                 -y_target / pred_clipped + (1 - y_target) / (1 - pred_clipped)
             ) / pred_clipped.shape[1]
 
         @staticmethod
-        def cce(y_target, y_pred):
+        def cce(y_target: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
             pred_clipped = np.clip(y_pred, 1e-12, 1.0)
             return -y_target / pred_clipped
