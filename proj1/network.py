@@ -24,7 +24,7 @@ class MLPNetwork:
         input_size: int,
         layers: list[Layer],
         loss_function: Callable[[np.ndarray, np.ndarray], float],
-        loss_gradient_function: Callable[[np.ndarray, np.ndarray], float],
+        loss_gradient_function: Callable[[np.ndarray, np.ndarray], np.ndarray],
         include_bias: bool,
         seed: int | None = None,
     ) -> None:
@@ -79,10 +79,12 @@ class MLPNetwork:
             self.loss_fn is Loss.cce and self.activation_fns[-1] is Activation.softmax
         ):
             delta = activations[-1] - y_target
+            if self.loss_fn is Loss.bce:
+                delta /= y_target.shape[1]
         elif self.activation_fns[-1] is Activation.softmax:
             a = activations[-1]
             grad_a = self.loss_grad(y_target, a)
-            delta = a * (grad_a - grad_a @ a.T)
+            delta = a * (grad_a - np.sum(grad_a * a, axis=1, keepdims=True))
         else:
             delta = self.loss_grad(y_target, activations[-1]) * self.activation_grads[-1](zs[-1])
 
