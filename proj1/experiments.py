@@ -18,6 +18,7 @@ class Result:
     train_metric: float
     validation_metric: float
     loss_history: list[float]
+    model: MLPNetwork
 
 
 ACTIVATIONS: dict[str, tuple[ActivationFn, ActivationFn]] = {
@@ -46,6 +47,7 @@ class Experiments:
         epochs: int = 1000,
         learning_rate: float = 0.01,
         batch_size: int = 32,
+        save_history: bool = False,
     ) -> None:
         self.X_train, self.y_train = X_train, y_train
         self.X_val, self.y_val = X_val, y_val
@@ -54,10 +56,11 @@ class Experiments:
         self.epochs = epochs
         self.learning_rate = learning_rate
         self.batch_size = batch_size
+        self.save_history = save_history
 
     def _metric(self, y: np.ndarray, pred: np.ndarray) -> float:
         if self.task == "regression":
-            return float(Loss.mse(y, pred))
+            return float(np.mean((pred - y) ** 2))
 
         if y.shape[1] == 1:
             return float(np.mean((pred >= 0.5) == y))
@@ -100,7 +103,7 @@ class Experiments:
             epochs=self.epochs,
             learning_rate=self.learning_rate,
             batch_size=self.batch_size,
-            history_saved=True,
+            history_saved=self.save_history,
         )
 
         return Result(
@@ -116,6 +119,7 @@ class Experiments:
             train_metric=self._metric(self.y_train, model.predict(self.X_train)),
             validation_metric=self._metric(self.y_val, model.predict(self.X_val)),
             loss_history=model.loss_history.copy(),
+            model=model,
         )
 
     def varying_activation(self) -> list[Result]:
@@ -134,10 +138,11 @@ class Experiments:
         return [self._run([16, 16], loss=loss) for loss in ("mse", "mae")]
 
     def varying_classification_loss(self) -> list[Result]:
-        if self.task != "classification" or self.y_train.shape[1] != 1:
-            raise ValueError("Binary classification required")
+        if self.task != "classification":
+            raise ValueError("Classification required")
 
-        return [self._run([16, 16], loss=loss) for loss in ("bce", "mse")]
+        first = "bce" if self.y_train.shape[1] == 1 else "cce"
+        return [self._run([16, 16], loss=loss) for loss in (first, "mse")]
 
     def run(self) -> None:
         pass

@@ -8,11 +8,11 @@ from matplotlib import pyplot as plt
 class Plotter:
     @staticmethod
     def plot_losses(loss_history: list[float]) -> None:
-        sns.lineplot(loss_history)
+        plt.plot(np.arange(len(loss_history)), loss_history)
         plt.yscale('log')
         plt.ylabel('Loss')
         plt.xlabel('Batch')
-        plt.title('Historia błędów w czasie treningu')
+        plt.title("Training loss")
 
     @staticmethod
     def plot_weights(
@@ -102,12 +102,12 @@ class Plotter:
     def plot_lineweight(
         weight_history: list[list[np.ndarray]],
         weight_index: tuple[int, int, int],
-    ):
+    ) -> None:
         i, j, k = weight_index
-        sns.lineplot([weights[i][j][k] for weights in weight_history], label=f'w_{i}_{j}_{k}')
+        plt.plot([weights[i][j][k] for weights in weight_history], label=f'w_{i}_{j}_{k}')
         plt.xlabel('Batch')
-        plt.ylabel('Wartość')
-        plt.title('Wartości wag w kolejnych batchach')
+        plt.ylabel("Value")
+        plt.title("Parameter values during training")
 
     @staticmethod
     def plot_linebias(
@@ -117,20 +117,27 @@ class Plotter:
         i, j = bias_index
         sns.lineplot([biases[i][j] for biases in bias_history], label=f'b_{i}_{j}')
         plt.xlabel('Batch')
-        plt.ylabel('Wartość')
-        plt.title('Wartości wag w kolejnych batchach')
+        plt.ylabel("Value")
+        plt.title("Parameter values during training")
 
     @staticmethod
     def plot_classification_results(X: np.ndarray, y: np.ndarray, name: str) -> None:
-        sns.scatterplot(x=X[:,0], y=X[:,1], c=y)
+        points = plt.scatter(X[:,0], X[:,1], c=np.asarray(y).ravel())
+        plt.legend(*points.legend_elements(num=np.unique(y).tolist()), title="Class")
         plt.ylabel('y')
         plt.xlabel('x')
-        plt.title(f'Klasyfikacja {name}')
+        plt.title(f"Classification: {name}")
 
     @staticmethod
-    def plot_regression_results(X: np.ndarray, y: np.ndarray, dataset: str, label: str) -> None:
-        sns.lineplot(x=X[:,0], y=y[:,0], label=label)
+    def plot_regression_results(
+        X: np.ndarray, y: np.ndarray, dataset: str, label: str, *, points: bool = False
+    ) -> None:
+        if points:
+            plt.scatter(X[:,0], y[:,0], label=label, s=12)
+        else:
+            order = np.argsort(X[:,0])
+            plt.plot(X[order,0], y[order,0], label=label)
         plt.ylabel('y')
         plt.xlabel('x')
-        plt.title(f'Regresja {dataset}')
+        plt.title(f"Regression: {dataset}")
 

@@ -8,7 +8,7 @@ class Loss:
 
     @staticmethod
     def mse(y_target: np.ndarray, y_pred: np.ndarray) -> float:
-        return 0.5 * np.mean((y_target - y_pred) ** 2)
+        return float(0.5 * np.mean(np.sum((y_target - y_pred) ** 2, axis=1)))
 
     @staticmethod
     def bce(y_target: np.ndarray, y_pred: np.ndarray) -> float:
