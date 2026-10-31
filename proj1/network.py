@@ -2,6 +2,7 @@ import itertools
 from collections.abc import Callable
 
 import numpy as np
+from tqdm import tqdm
 from activations import Activation
 from losses import Loss
 
@@ -114,7 +115,12 @@ class MLPNetwork:
         epochs: int = 1000,
         learning_rate: float = 0.015,
         batch_size: int = 64,
-        history_saved=False,
+        save_loss_history=False,
+        save_weight_history=False,
+        save_metric_history=False,
+        metric: Callable[[np.ndarray, np.ndarray], float] | None = None,
+        X_test: np.ndarray | None = None,
+        y_test: np.ndarray | None = None,
     ) -> None:
         X = np.asarray(X, dtype=float)
         y = np.asarray(y, dtype=float)
@@ -131,28 +137,52 @@ class MLPNetwork:
         if y.shape[1] != self.weights[-1].shape[1]:
             raise ValueError("y.shape[1] != self.weights[-1].shape[1]")
 
-        if history_saved:
+        if save_loss_history:
             self.loss_history = []
+            if X_test is not None and y_test is not None:
+                self.test_loss_history = []
+        if save_metric_history:
+            self.metric_history = []
+            if X_test is not None and y_test is not None:
+                self.test_metric_history = []
+        if save_weight_history:
             self.weight_history = []
             self.bias_history = []
 
         batches_num = len(X)
 
-        for _ in range(epochs):
+        for _ in tqdm(range(epochs)):
+            y_pred = self._forward(X)
+            loss = self.loss_fn(y, y_pred)
+            print(f'\nLoss: {loss}')
+
+            y_test_pred = None
+            if X_test is not None and y_test is not None:
+                y_test_pred = self._forward(X_test)
+
+            if save_loss_history:
+                self.loss_history.append(loss)
+                if y_test_pred is not None and y_test is not None:
+                    loss = self.loss_fn(y_test, y_test_pred)
+                    self.test_loss_history.append(loss)
+            
+            if save_metric_history and metric:
+                metric_value = metric(y, y_pred)
+                self.metric_history.append(metric_value)
+                if y_test_pred is not None and y_test is not None:
+                    metric_value = metric(y_test, y_test_pred)
+                    self.test_metric_history.append(metric_value)
+            
+            if save_weight_history:
+                self.weight_history.append([w.copy() for w in self.weights])
+                if self.include_bias:
+                    self.bias_history.append([b.copy() for b in self.biases])
+
             shuffled_indices = self.rng.permutation(batches_num)
             for batch_start in range(0, batches_num, batch_size):
                 batch_indices = shuffled_indices[batch_start : batch_start + batch_size]
 
                 X_batch, y_batch = X[batch_indices], y[batch_indices]
                 y_pred = self._forward(X_batch, cached_activations=True)
-                loss = self.loss_fn(y_batch, y_pred)
-
-                if history_saved:
-                    self.loss_history.append(loss)
-                    self.weight_history.append([w.copy() for w in self.weights])
-                    if self.include_bias:
-                        self.bias_history.append([b.copy() for b in self.biases])
-
                 grad_weights, grad_biases = self._backward(y_batch)
-
                 self._update_parameters(grad_weights, grad_biases, learning_rate)
