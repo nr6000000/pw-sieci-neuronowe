@@ -9,6 +9,9 @@ dependencies = [
     "matplotlib>=3.11.2",
     "seaborn>=0.13.2",
     "networkx>=3.7",
+    "tqdm>=4.70.1",
+    "numba>=0.68.1",
+    "scipy>=1.18.1",
 ]
 [tool.ruff]
 target-version = "py313"
