@@ -1,0 +1,90 @@
+{
+  "rules": [
+    "hebb",
+    "oja",
+    "oja_subspace"
+  ],
+  "oja_subspace_variant": "batch_oja_subspace_qr_projection",
+  "subspace_training": {
+    "max_fit_steps": 1000000,
+    "requested_learning_rate": 0.001,
+    "learning_rate_policy": "min(requested_learning_rate, 1 / neurons)",
+    "actual_learning_rate": "recorded per fit in training.csv",
+    "fit_tol": 1e-06,
+    "check_every": 100,
+    "initialization_seed": 42,
+    "components": "rank of training matrix",
+    "centered": false,
+    "qr_retraction": true,
+    "batch_update": "CB - B @ (B.T @ CB), C = X.T @ X / P",
+    "memory": "B @ B.T with zero diagonal",
+    "budget_note": "batch updates are separate from clamped Oja epochs"
+  },
+  "oja_variant": "clamped_autoassociative",
+  "learning_rate": 0.001,
+  "epochs": 10,
+  "max_steps": 100,
+  "seed": 42,
+  "noise": [
+    0.0,
+    0.05,
+    0.1,
+    0.2,
+    0.3,
+    0.4,
+    0.5
+  ],
+  "repeats": 30,
+  "subset_selection": "one nested random subset per size",
+  "case_randomness": "seed column controls noise and Numba async order",
+  "numpy_version": "2.5.3",
+  "thread_environment": {
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1"
+  },
+  "rows": {
+    "stability": 348,
+    "recall": 146160,
+    "fit_errors": 0,
+    "training": 69
+  },
+  "source_sha256": {
+    "hopfield.py": "75a47f1b0b5e3c71667be3fc3002ef287edae9de2ea1e1acba61c29e20ef08f3",
+    "experiments.py": "c2a99acfe5ecd0e6f7b18aedd44e0705944ba27135ef15a69ab585e0eeacc53a"
+  },
+  "dataset_sha256": {
+    "animals-14x9.csv": "86a3148f27a5e9bf397b12526617440d33435aed6b41daaa0897e2d34b5c60ed",
+    "large-25x25.csv": "4e14a2bb7f05883f98696b25023198f881d851d6fae6ca6a6a913d569e4aa0cc",
+    "large-25x25.plus.csv": "93648ad2c423d1147b3802759f2d7c789f91d8db06a368d5d5bb431dda22cb61",
+    "large-25x50.csv": "2dc4a1d459612cb3487b0e5c23ec152c0c6fc655c1df5f0c8b8822cf102d61fe",
+    "letters-14x20.csv": "ecca80f2041d0e2ec00fba287f6629e834eacdd1f2a062db4de4743f10bfaf07",
+    "letters-abc-8x12.csv": "4856c333d9fe57aac1bebb60aa30cfe5d62c9c734fe72f88558f0f8b955af8d9",
+    "OCRA-12x30-cut.csv": "c980337d246f8044254ef5e865a95916eb136de2e92e7e18b6e406ebee2ee94e",
+    "small-7x7.csv": "91fb973090239725101acd19d2d9f18ffe3b712e9b50c01013f5612dd4bc17a0"
+  },
+  "versioned_results": {
+    "recall": {
+      "path": "recall.csv.gz",
+      "format": "gzip-compressed CSV",
+      "rows": 146160,
+      "uncompressed_sha256": "25ff2f0ce904698457c07f24c937d7cae9c6b70efe3d9782b87991c5d18cec83"
+    },
+    "summary": {
+      "path": "summary.csv",
+      "group_by": [
+        "dataset",
+        "p",
+        "rule",
+        "mode",
+        "noise"
+      ],
+      "groups": 966
+    },
+    "note": "Raw recall.csv is generated locally; the full data are versioned losslessly as gzip."
+  },
+  "git_source_sha256": {
+    "hopfield.py": "a9168c4d21e290e62e74a5d605527ff80abef025edad65b1cbebe5e0dd067382",
+    "experiments.py": "93081d55446658b3a17f97a8c7bf6b19b9f6dadec95496a6235fcebfbd985c13"
+  },
+  "source_hash_note": "source_sha256 hashes the exact working-tree bytes used in the run. git_source_sha256 hashes the same source with LF line endings as stored by Git; contents are otherwise identical."
+}

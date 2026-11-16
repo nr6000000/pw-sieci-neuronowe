@@ -8,3 +8,8 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Local Hopfield runs and forensic archives; version only the current comparison.
+/proj2/results/*
+!/proj2/results/subspace_comparison/
+/proj2/results/subspace_comparison/recall.csv
