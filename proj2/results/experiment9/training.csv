@@ -1,0 +1,3 @@
+rule,status,p,neurons,stored_bytes,reason
+hebb,completed,10,60000,4800000,
+oja,skipped,10,60000,,Dense weights require 28800000000 bytes

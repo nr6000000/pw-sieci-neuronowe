@@ -9,7 +9,6 @@ wheels/
 # Virtual environments
 .venv
 
-# Local Hopfield runs and forensic archives; version only the current comparison.
+# Results, one directory per experiment.
 /proj2/results/*
-!/proj2/results/subspace_comparison/
-/proj2/results/subspace_comparison/recall.csv
+!/proj2/results/experiment*/
