@@ -1,0 +1,7 @@
+mode,step,x0,x1,energy,status
+sync,0,1.0,-1.0,1.0,cycle_2
+sync,1,-1.0,1.0,1.0,cycle_2
+sync,2,1.0,-1.0,1.0,cycle_2
+async,0,1.0,-1.0,1.0,fixed_point
+async,1,-1.0,-1.0,-1.0,fixed_point
+async,2,-1.0,-1.0,-1.0,fixed_point

@@ -8,3 +8,7 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Results, one directory per experiment.
+/proj2/results/*
+!/proj2/results/experiment*/
